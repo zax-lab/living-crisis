@@ -14,13 +14,18 @@ CLAUDE.md    # this file
 
 There is no application code, no build system, no dependency manifest
 (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, …), no test suite,
-no linter or formatter configuration, and no CI workflows. The single commit on
-`main` is the initial commit that created the README.
+no linter or formatter configuration, and no GitHub Actions workflows. The
+single commit on `main` is the initial commit that created the README.
 
-Everything below is therefore split into two parts: **what is actually true
-today**, and **what to establish when the first real code lands**. Do not infer
-a technology stack, directory layout, or set of commands from the repository
-name — nothing in the repository specifies one.
+There is, however, a **deployment target already configured outside the
+repository** (see *Deployment* below), and it commits the project to a specific
+stack. That is the one piece of real signal about where this is headed.
+
+Everything below is split into **what is actually true today** and **what to
+establish when the first real code lands**. Note the distinction the deployment
+config forces: a stack has been *chosen*, but nothing in the repository
+*implements* it. Do not treat the configured framework as though the code for it
+exists.
 
 ## What is actually true today
 
@@ -32,9 +37,42 @@ name — nothing in the repository specifies one.
 
 ### Build / test / lint commands
 
-None exist. There is nothing to build, run, or test. If you are asked to "run
-the tests" or "start the app", the correct answer is that no such entry point
-is defined yet — say so rather than guessing at a command.
+None exist in the repository. There is nothing to build, run, or test locally.
+If you are asked to "run the tests" or "start the app", the correct answer is
+that no such entry point is defined yet — say so rather than guessing.
+
+### Deployment (configured, but not yet functional)
+
+The repository is connected to a **Vercel** project named `living-crisis`,
+configured outside the repo (there is no `vercel.json` tracked here):
+
+| Setting | Value |
+| --- | --- |
+| Framework preset | `docusaurus-2` |
+| Build command | `docusaurus build` |
+| Node version | `24.x` |
+
+**Every deployment so far has failed, including production on `main`.** The
+build errors with:
+
+```
+sh: line 1: docusaurus: command not found
+Error: Command "docusaurus build" exited with 127
+```
+
+This is expected, not a regression: the build command needs a `package.json`
+with Docusaurus installed, and the repository has neither. Production on `main`
+has been in this state since the initial commit. Any pull request opened against
+this repository will therefore show a failing Vercel deployment until the site
+is actually scaffolded — **a red Vercel check on a PR is a pre-existing
+condition, not something that PR broke.** Verify before assuming otherwise, but
+do not attempt to "fix" it by scaffolding a site as a side effect of an
+unrelated change.
+
+The practical implication: **the intended stack is Docusaurus 2 on Node 24**,
+and that decision is already made. A first scaffold should satisfy
+`docusaurus build` rather than introduce a different framework, or the Vercel
+project settings need updating to match whatever is chosen instead.
 
 ### Conventions
 
@@ -70,25 +108,41 @@ it as part of your change (see *Keeping this file current* below).
 
 An empty repository makes it tempting to add scaffolding nobody asked for —
 a framework, a CI pipeline, a lint config, a directory tree. Don't. Add exactly
-what the task requires. Foundational choices (language, framework, package
-manager, test runner) are the maintainer's to make; if a task requires one and
-it hasn't been specified, ask rather than picking silently, because the first
-choice made here becomes the default for everything after it.
+what the task requires.
+
+This applies with particular force to the failing Vercel deployment. It is
+visible on every PR and it looks like something to fix, but scaffolding a
+Docusaurus site to turn that check green is a large, foundational change that
+no small task authorizes. Leave it red unless scaffolding the site *is* the
+assigned task.
+
+The framework question is settled (Docusaurus 2), but the remaining
+foundational choices — package manager, test runner, lint/format tooling,
+content structure — are the maintainer's to make. If a task requires one and it
+hasn't been specified, ask rather than picking silently: the first choice made
+here becomes the default for everything after it.
 
 ## When the first real code lands
 
-The first substantive change should establish, and record here:
+The likely first task is scaffolding the Docusaurus site the Vercel project
+already expects. Whatever form it takes, it should establish and record here:
 
-1. **Language and runtime**, with the version constraint and how it is pinned.
-2. **Dependency manifest and lockfile**, plus the install command.
-3. **Entry point** — how to run the thing locally.
-4. **Test command**, and where tests live relative to source.
-5. **Lint/format commands**, and whether they are enforced in CI.
-6. **Directory layout**, with a sentence on what belongs in each top-level
-   directory.
+1. **Runtime pinning** — Vercel builds on Node `24.x`; pin to match
+   (`.nvmrc`, or `engines` in `package.json`) so local and CI agree.
+2. **Dependency manifest and lockfile**, plus the install command. The
+   lockfile choice fixes the package manager for everyone after.
+3. **Build command** — must satisfy Vercel's configured `docusaurus build`,
+   or the Vercel project settings must be changed to match.
+4. **Local dev entry point** — typically `docusaurus start`.
+5. **Test and lint/format commands**, if any, and whether they run in CI. Note
+   that there are currently no GitHub Actions workflows; Vercel is the only
+   automated check.
+6. **Content layout** — for a docs site this is the load-bearing structure:
+   where pages live, how the sidebar is configured, and where static assets go.
 
 Once those exist, replace the *"What is actually true today"* section above
-with concrete content:
+with concrete content — and update the *Deployment* section, since the
+"every build fails" note stops being true the moment the site builds:
 
 - **Commands** — the exact invocations a contributor runs, including the
   narrow ones (a single test file, a single package) that are cheaper than
