@@ -14,8 +14,9 @@ CLAUDE.md    # this file
 
 There is no application code, no build system, no dependency manifest
 (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, …), no test suite,
-no linter or formatter configuration, and no GitHub Actions workflows. The
-single commit on `main` is the initial commit that created the README.
+no linter or formatter configuration, and no GitHub Actions workflows. Before
+the commits that added this file, `main` held exactly one commit: the initial
+commit that created the README.
 
 There is, however, a **deployment target already configured outside the
 repository** (see *Deployment* below), and it commits the project to a specific
@@ -33,7 +34,8 @@ exists.
 
 - Remote: `https://github.com/zax-lab/living-crisis`
 - Default branch: `main`
-- History: a single initial commit; no tags, no releases.
+- History: the initial commit that created the README, plus the commits that
+  added this file. No tags, no releases.
 
 ### Build / test / lint commands
 
@@ -135,8 +137,10 @@ already expects. Whatever form it takes, it should establish and record here:
    or the Vercel project settings must be changed to match.
 4. **Local dev entry point** — typically `docusaurus start`.
 5. **Test and lint/format commands**, if any, and whether they run in CI. Note
-   that there are currently no GitHub Actions workflows; Vercel is the only
-   automated check.
+   that there are no GitHub Actions workflows in the repository; the automated
+   checks are external — the Vercel deployment, and the Codex GitHub App, which
+   reviews a pull request when it is opened, when a draft is marked ready, or
+   on an `@codex review` comment.
 6. **Content layout** — for a docs site this is the load-bearing structure:
    where pages live, how the sidebar is configured, and where static assets go.
 
